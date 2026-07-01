@@ -1,0 +1,154 @@
+.gp-badge {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 20, 20, 0.82);
+  color: #e0e0e0;
+  font-family: sans-serif;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  user-select: none;
+}
+
+.gp-badge .gp-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #777;
+  flex-shrink: 0;
+}
+
+.gp-badge.gp-connected .gp-dot {
+  background: #6fc276;
+  box-shadow: 0 0 6px #6fc276;
+}
+
+.gp-badge .gp-label {
+  white-space: nowrap;
+  max-width: 42vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gp-badge .gp-settings-btn {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.gp-badge .gp-settings-btn:hover {
+  color: #fff;
+}
+
+.gp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+}
+
+.gp-modal {
+  background: #fff;
+  color: #222;
+  width: min(420px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.gp-modal h2 {
+  margin: 0 0 4px;
+  font-size: 1.2em;
+}
+
+.gp-modal .gp-hint {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 14px;
+}
+
+.gp-modal .gp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  gap: 10px;
+}
+
+.gp-modal .gp-row-label {
+  font-weight: 500;
+}
+
+.gp-modal .gp-row-btn {
+  min-width: 90px;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.gp-modal .gp-row-btn.gp-listening {
+  background: #4a6cb3;
+  color: #fff;
+  border-color: #4a6cb3;
+}
+
+.gp-modal .gp-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.gp-modal .gp-actions button {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.gp-modal .gp-reset {
+  background: #eee;
+  color: #333;
+}
+
+.gp-modal .gp-close {
+  background: #4a6cb3;
+  color: #fff;
+}
+
+.gp-toast {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.9);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: sans-serif;
+  font-size: 13px;
+  z-index: 10001;
+  pointer-events: none;
+}

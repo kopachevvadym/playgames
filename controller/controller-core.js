@@ -64,9 +64,19 @@ export class GamepadWatcher extends EventTarget {
 
   _loop() {
     this._raf = requestAnimationFrame(() => this._loop());
-    if (this.index === null) return;
 
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+
+    if (this.index === null) {
+      // Don't rely solely on the 'gamepadconnected' event: some browsers
+      // only populate getGamepads() after the user presses a button while
+      // the tab is focused, without firing the event reliably.
+      for (const pad of pads) {
+        if (pad) { this._attach(pad.index); break; }
+      }
+      if (this.index === null) return;
+    }
+
     const pad = pads[this.index];
     if (!pad) { this._detach(); return; }
 

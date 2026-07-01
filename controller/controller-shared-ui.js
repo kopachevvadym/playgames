@@ -17,7 +17,7 @@ export function createBadge(watcher, onSettings) {
   badge.className = 'gp-badge';
   badge.innerHTML = `
     <span class="gp-dot"></span>
-    <span class="gp-label">Контролер не підключено</span>
+    <span class="gp-label">Контролер: натисніть будь-яку кнопку</span>
     ${onSettings ? '<button class="gp-settings-btn" title="Налаштування контролера">⚙️</button>' : ''}
   `;
   document.body.appendChild(badge);
@@ -30,7 +30,7 @@ export function createBadge(watcher, onSettings) {
       label.textContent = watcher.padLabel || 'Контролер підключено';
     } else {
       badge.classList.remove('gp-connected');
-      label.textContent = 'Контролер не підключено';
+      label.textContent = 'Контролер: натисніть будь-яку кнопку';
     }
   }
 

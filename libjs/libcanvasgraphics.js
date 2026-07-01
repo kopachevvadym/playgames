@@ -175,7 +175,7 @@ const CanvasImage = {
     ctx.putImageData(imageData, 0, 0);
     return await createImageBitmap(ctx.canvas);
   },
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasImage_getRGBAFromBitmap(lib, bmp, sx, sy, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasImage_getRGBAFromBitmap(lib, bmp, sx, sy, width, height) {
     ctx.canvas.width = width; ctx.canvas.height = height;
     ctx.drawImage(bmp, sx, sy, width, height, 0, 0, width, height);
 
@@ -196,7 +196,7 @@ const CanvasImage = {
 
     return await createImageBitmap(ctx.canvas);
   },
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasImage_closeBitmap(lib, bmp) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasImage_closeBitmap(lib, bmp) {
     bmp.close();
   }
 };
@@ -241,14 +241,20 @@ function setColor(ctx, r, g, b, a) {
   ctx.strokeStyle = `rgba(${r} ${g} ${b} / ${a/255})`;
 }
 
+// Only the handful of methods that genuinely await a Promise (createImageBitmap,
+// toBlob) stay `async`. Every other primitive here is a synchronous canvas
+// operation, so it's declared as a plain function: that keeps the per-draw-call
+// path off CheerpJ's async native mechanism, which would otherwise suspend and
+// resume the Java thread (a WASM stack unwind/rewind) for every fillRect,
+// drawImage, drawText, etc. — dozens to hundreds of times per rendered frame.
 const CanvasGraphics = ({
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_getRGBAFromCtx(lib, ctx, sx, sy, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_getRGBAFromCtx(lib, ctx, sx, sy, width, height) {
     const imageData = ctx.getImageData(sx, sy, width, height);
 
     return castToInt8(imageData.data);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawRGBAData(lib, targetCtx, rgba, width, height, x, y, blend) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawRGBAData(lib, targetCtx, rgba, width, height, x, y, blend) {
     if (blend) {
       // this is not putImageData, we need to blend here
       ctx.canvas.width = width; ctx.canvas.height = height;
@@ -259,7 +265,7 @@ const CanvasGraphics = ({
     }
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_bitmapToCanvasCtx(lib, bmp) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_bitmapToCanvasCtx(lib, bmp) {
     const newCtx = document.createElement('canvas').getContext('2d');
     newCtx.canvas.width = bmp.width; newCtx.canvas.height = bmp.height;
 
@@ -270,11 +276,11 @@ const CanvasGraphics = ({
     return newCtx;
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_getCanvasFromCtx(lib, ctx) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_getCanvasFromCtx(lib, ctx) {
     return ctx.canvas;
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_createCanvasCtx(lib, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_createCanvasCtx(lib, width, height) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -291,7 +297,7 @@ const CanvasGraphics = ({
     return ctx;
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setFullState(lib, ctx, fontStr, dotted, r, g, b, a, clipX, clipY, clipWidth, clipHeight, translateX, translateY) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setFullState(lib, ctx, fontStr, dotted, r, g, b, a, clipX, clipY, clipWidth, clipHeight, translateX, translateY) {
     ctx.restore();
     ctx.save();
 
@@ -311,34 +317,34 @@ const CanvasGraphics = ({
     ctx.translate(translateX, translateY);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setColor(lib, ctx, r, g, b, a) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setColor(lib, ctx, r, g, b, a) {
     setColor(ctx, r, g, b, a);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setFont(lib, ctx, fontStr) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setFont(lib, ctx, fontStr) {
     ctx.font = fontStr;
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setDotted(lib, ctx, dotted) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_setDotted(lib, ctx, dotted) {
     ctx.setLineDash(dotted ? [2, 2] : []);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_applyTranslate(lib, ctx, x, y) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_applyTranslate(lib, ctx, x, y) {
     ctx.translate(x, y);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_putRGBAData(lib, ctx, rgbaData, x, y, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_putRGBAData(lib, ctx, rgbaData, x, y, width, height) {
     const imageData = new ImageData(castToUint8Clamped(rgbaData), width, height);
     ctx.putImageData(imageData, x, y);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawArc(lib, ctx, x, y, width, height, start, arc) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawArc(lib, ctx, x, y, width, height, start, arc) {
     ctx.beginPath();
     ctx.ellipse(x+width/2+0.5, y+height/2+0.5, width/2, height/2, 0, -start*Math.PI/180, -start*Math.PI/180-arc*Math.PI/180, arc > 0);
     ctx.stroke();
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillArc(lib, ctx, x, y, width, height, start, arc) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillArc(lib, ctx, x, y, width, height, start, arc) {
     ctx.beginPath();
     ctx.moveTo(x+width/2, y+height/2);
     ctx.ellipse(x+width/2, y+height/2, width/2, height/2, 0, -start*Math.PI/180, -start*Math.PI/180-arc*Math.PI/180, arc > 0);
@@ -346,7 +352,7 @@ const CanvasGraphics = ({
     ctx.fill();
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawRect(lib, ctx, x, y, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawRect(lib, ctx, x, y, width, height) {
     // 0, 0 doesn't work like in java..
     width = width || 1;
     height = height || 1;
@@ -354,25 +360,25 @@ const CanvasGraphics = ({
     ctx.strokeRect(x+0.5, y+0.5, width, height);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_clearRect(lib, ctx, x, y, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_clearRect(lib, ctx, x, y, width, height) {
     ctx.clearRect(x, y, width, height);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillRect(lib, ctx, x, y, width, height) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillRect(lib, ctx, x, y, width, height) {
     ctx.fillRect(x, y, width, height);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawRoundRect(lib, ctx, x, y, width, height, arcWidth, arcHeight) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawRoundRect(lib, ctx, x, y, width, height, arcWidth, arcHeight) {
     roundRectPath(ctx, x+0.5, y+0.5, width, height, arcWidth, arcHeight);
     ctx.stroke();
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillRoundRect(lib, ctx, x, y, width, height, arcWidth, arcHeight) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillRoundRect(lib, ctx, x, y, width, height, arcWidth, arcHeight) {
     roundRectPath(ctx, x, y, width, height, arcWidth, arcHeight);
     ctx.fill();
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawLine(lib, ctx, x1, y1, x2, y2) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawLine(lib, ctx, x1, y1, x2, y2) {
     // we at least try to be sharp..
     if (y1 === y2) {
       y1 = y1 + 0.5;
@@ -389,7 +395,7 @@ const CanvasGraphics = ({
     ctx.stroke();
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawPolygon(lib, ctx, x, y, n) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawPolygon(lib, ctx, x, y, n) {
     ctx.beginPath();
     ctx.moveTo(x[0]+0.5, y[0]+0.5);
     for (let t=1;t<n;t++) {
@@ -399,7 +405,7 @@ const CanvasGraphics = ({
     ctx.stroke();
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillPolygon(lib, ctx, x, y, n, useSharpFillHack) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_fillPolygon(lib, ctx, x, y, n, useSharpFillHack) {
     ctx.beginPath();
     ctx.moveTo(x[0], y[0]);
     for (let t=1;t<n;t++) {
@@ -420,11 +426,11 @@ const CanvasGraphics = ({
     }
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawText(lib, ctx, text, x, y) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawText(lib, ctx, text, x, y) {
     ctx.fillText(text, x, y);
   },
 
-  async Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawImage2(lib, ctx, source, sx, sy, dx, dy, width, height, flipY, withAlpha) {
+  Java_pl_zb3_freej2me_bridge_graphics_CanvasGraphics_drawImage2(lib, ctx, source, sx, sy, dx, dy, width, height, flipY, withAlpha) {
     if (!withAlpha) {
       // somehow needed?
       ctx.save();
@@ -466,7 +472,7 @@ const CanvasGraphics = ({
 export default {
   ...CanvasImage,
   ...CanvasGraphics,
-  async Java_pl_zb3_freej2me_bridge_graphics_Utils_getCanvasFromCtx(lib, ctx) {
+  Java_pl_zb3_freej2me_bridge_graphics_Utils_getCanvasFromCtx(lib, ctx) {
     return ctx.canvas;
   },
 }

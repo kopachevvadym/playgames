@@ -28,6 +28,9 @@ let scaleSet = false;
 
 const keyRepeatManager = new KeyRepeatManager();
 
+// Cached Java class references for the event dispatch hot path (see below).
+let eventClasses = null;
+
 window.evtQueue = evtQueue;
 
 function autoscale() {
@@ -96,11 +99,22 @@ function setListeners() {
                 autoscale();
             }
         } else if (codeMap[key]) {
-            console.log('queuin event');
-            evtQueue.queueEvent({
+            const code = codeMap[key];
+            const evt = {
                 kind: kind === 'up' ? 'keyup' : 'keydown',
-                args: [codeMap[key], args.symbol, args.ctrlKey, args.shiftKey]
-            });
+                args: [code, args.symbol, args.ctrlKey, args.shiftKey]
+            };
+
+            if (kind === 'repeat') {
+                // the emulator can be much slower to process events than the 30ms
+                // repeat interval fires; without this, holding a key (incl. a
+                // gamepad direction) queues repeats faster than they're consumed,
+                // building an ever-growing backlog that makes input feel massively
+                // delayed and keeps affecting the game long after the key was released
+                evtQueue.queueEvent(evt, e => e.kind === 'keydown' && e.args[0] === code);
+            } else {
+                evtQueue.queueEvent(evt);
+            }
         }
     });
 
@@ -186,16 +200,12 @@ function setListeners() {
     });
 
     document.addEventListener('mousedown', e => {
-        console.log('refocus');
         setTimeout(() => display.focus(), 20);
-        ;
     });
 
     display.addEventListener('blur', e => {
-        console.log('refocus');
         // it doesn't work without any timeout
         setTimeout(() => display.focus(), 10);
-        ;
     });
 
     window.addEventListener('resize', autoscale);
@@ -278,8 +288,16 @@ async function init() {
                 autoscale();
             },
             async Java_pl_zb3_freej2me_bridge_shell_Shell_waitForAndDispatchEvents(lib, listener) {
-                const KeyEvent = await lib.pl.zb3.freej2me.bridge.shell.KeyEvent;
-                const PointerEvent = await lib.pl.zb3.freej2me.bridge.shell.PointerEvent;
+                // Resolving these Java classes is a CheerpJ round-trip; cache them
+                // once instead of re-resolving on every single input event (this
+                // native is called in a tight loop from the Java event thread).
+                if (!eventClasses) {
+                    eventClasses = {
+                        KeyEvent: await lib.pl.zb3.freej2me.bridge.shell.KeyEvent,
+                        PointerEvent: await lib.pl.zb3.freej2me.bridge.shell.PointerEvent,
+                    };
+                }
+                const {KeyEvent, PointerEvent} = eventClasses;
 
                 const evt = await evtQueue.waitForEvent();
                 if (evt.kind == 'keydown') {

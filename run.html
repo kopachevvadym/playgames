@@ -33,8 +33,101 @@
     #display:focus {
         outline: none;
     }
+    /* PlayStation-style boot screen shown while the game loads */
     #loading {
-        font-size: 2em;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background:
+            radial-gradient(ellipse 60% 45% at 50% 45%, #0a1330 0%, rgba(3,5,15,0) 70%),
+            #000;
+        color: #cfd6e6;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    #loading[hidden] { display: none; }
+
+    .ps-sce {
+        position: absolute;
+        top: 33%;
+        font-size: clamp(11px, 2.6vw, 15px);
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        color: #eef1f8;
+        padding-left: 0.42em;
+        white-space: nowrap;
+        opacity: 0;
+        animation: ps-sce 3.4s ease forwards;
+    }
+
+    @keyframes ps-sce {
+        0%, 12%  { opacity: 0; }
+        28%      { opacity: 1; }
+        56%      { opacity: 1; }
+        72%, 100%{ opacity: 0; }
+    }
+
+    .ps-logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        opacity: 0;
+        transform: scale(0.9);
+        animation: ps-logo-in 1.1s cubic-bezier(.2,.7,.2,1) 1.95s forwards;
+        filter: drop-shadow(0 0 24px rgba(45,95,220,0.3));
+    }
+
+    @keyframes ps-logo-in {
+        from { opacity: 0; transform: scale(0.9); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+
+    .ps-logo svg {
+        width: clamp(180px, 44vw, 270px);
+        height: auto;
+        display: block;
+    }
+
+    .ps-wordmark {
+        font-family: 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        font-style: italic;
+        letter-spacing: -0.01em;
+        font-size: clamp(30px, 8vw, 54px);
+        line-height: 1;
+        background: linear-gradient(#ffffff, #b7c3dd);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .ps-status {
+        position: absolute;
+        bottom: 8%;
+        font-size: clamp(11px, 2.4vw, 14px);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #7c86a2;
+        animation: ps-status-pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes ps-status-pulse {
+        0%, 100% { opacity: 0.4; }
+        50%      { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ps-sce { display: none; }
+        .ps-logo { animation: none; opacity: 1; transform: none; }
+        .ps-status { animation: none; opacity: 0.8; }
     }
 
     .keypad-part {
@@ -188,7 +281,38 @@
 <body>
     <div id="screen-area">
         <canvas tabindex="0" id="display" style="display: none;"></canvas>
-        <div id="loading">Loading...</div>
+        <div id="loading">
+            <div class="ps-sce">Sony Computer Entertainment</div>
+            <div class="ps-logo">
+                <svg viewBox="0 0 300 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PlayStation">
+                    <defs>
+                        <linearGradient id="ps-blue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0" stop-color="#2b8cff"/>
+                            <stop offset="1" stop-color="#0a3f9c"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- "P": dark extrude behind, blue face on top -->
+                    <path d="M70,180 L70,45 C70,45 132,37 134,82 C135,111 92,110 70,107"
+                          fill="none" stroke="#05204d" stroke-width="30"
+                          stroke-linecap="round" stroke-linejoin="round" transform="translate(7,8)"/>
+                    <path d="M70,180 L70,45 C70,45 132,37 134,82 C135,111 92,110 70,107"
+                          fill="none" stroke="url(#ps-blue)" stroke-width="30"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- "S": green + yellow 3D faces, red front -->
+                    <path d="M198,92 C198,66 170,58 150,62 C126,67 122,90 146,99 C172,108 202,110 198,146 C195,176 162,186 134,174 C123,169 117,160 118,151"
+                          fill="none" stroke="#00a63c" stroke-width="30"
+                          stroke-linecap="round" stroke-linejoin="round" transform="translate(-5,7)"/>
+                    <path d="M198,92 C198,66 170,58 150,62 C126,67 122,90 146,99 C172,108 202,110 198,146 C195,176 162,186 134,174 C123,169 117,160 118,151"
+                          fill="none" stroke="#ffcf00" stroke-width="30"
+                          stroke-linecap="round" stroke-linejoin="round" transform="translate(6,-5)"/>
+                    <path d="M198,92 C198,66 170,58 150,62 C126,67 122,90 146,99 C172,108 202,110 198,146 C195,176 162,186 134,174 C123,169 117,160 118,151"
+                          fill="none" stroke="#e60019" stroke-width="30"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="ps-wordmark">PlayStation</div>
+            </div>
+            <div class="ps-status" id="loading-status">Loading...</div>
+        </div>
     </div>
     <div id="left-keys" class="keypad-part">
         <div class="key-grid left-grid">

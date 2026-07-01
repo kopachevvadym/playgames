@@ -33,6 +33,18 @@ let eventClasses = null;
 
 window.evtQueue = evtQueue;
 
+function setLoadingStatus(text) {
+    // The boot screen (#loading) holds rich markup, so write progress text into
+    // its dedicated status line instead of overwriting the whole element.
+    const status = document.getElementById('loading-status');
+    if (status) {
+        status.textContent = text;
+    } else {
+        const loading = document.getElementById('loading');
+        if (loading) loading.textContent = text;
+    }
+}
+
 function autoscale() {
     if (!scaleSet) return;
 
@@ -242,7 +254,7 @@ async function ensureAppInstalled(lib, appId) {
 }
 
 async function init() {
-    document.getElementById("loading").textContent = "Loading CheerpJ...";
+    setLoadingStatus("Loading CheerpJ...");
 
     display = document.getElementById('display');
     screenCtx = display.getContext('2d');
@@ -335,7 +347,7 @@ async function init() {
         }
     });
 
-    document.getElementById("loading").textContent = "Loading...";
+    setLoadingStatus("Loading...");
 
     const lib = await cheerpjRunLibrary(cheerpjWebRoot+"/freej2me-web.jar");
 
@@ -354,7 +366,7 @@ async function init() {
 
     FreeJ2ME.main(args).catch(e => {
         e.printStackTrace();
-        document.getElementById('loading').textContent = 'Crash :(';
+        setLoadingStatus('Crash :(');
     });
 
 

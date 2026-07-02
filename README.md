@@ -1,6 +1,8 @@
 # J2ME Player + Xbox Controller
 
 Сайт для запуску старих J2ME-ігор (`.jar`/`.jad`) прямо в браузері, з підтримкою Xbox-контролера.
+![Screenshot](images/preview.png)
+![Screenshot](images/game.png)
 
 ## Що це
 

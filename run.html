@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>freej2me-web</title>
+    <title>PlayGames</title>
 </head>
 <style>
     html, body {
@@ -15,7 +15,8 @@
         font-family: sans;
     }
     #screen-area {
-        background-color: #eee;
+        /* console-style letterbox: black around the game screen */
+        background-color: #000;
         position: absolute;
         top: 0;
         left: 0;
@@ -131,7 +132,7 @@
     }
 
     .keypad-part {
-        background-color: #222; /* Dark background for keypad areas */
+        background-color: #05070f; /* Dark background for keypad areas */
         padding: 8px;
         display: flex; /* Use flex to center the grid */
         justify-content: center;
@@ -160,10 +161,10 @@
 
     /* Individual Key Styles */
     .key {
-        background-color: #3a3a3a; /* Dark key background */
-        color: #e0e0e0; /* Light key text */
-        border: 1px solid #555;
-        border-radius: 5px;
+        background-color: #161c2c; /* Dark key background */
+        color: #e8ecf5; /* Light key text */
+        border: 1px solid #232a3d;
+        border-radius: 8px;
         font-size: 1.5em; /* Larger text */
         font-weight: bold;
         cursor: pointer;
@@ -180,11 +181,12 @@
         font-size: 0.4em;
         font-weight: normal;
         margin-top: 2px;
-        color: #aaa;
+        color: #8b94ab;
     }
 
     .key.active {
-        background-color: #6a6a6a;
+        background-color: #2b8cff;
+        border-color: #2b8cff;
         transform: scale(0.95); /* Slight shrink effect on press */
     }
 

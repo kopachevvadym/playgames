@@ -6,13 +6,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(20, 20, 20, 0.82);
-  color: #e0e0e0;
-  font-family: sans-serif;
+  background: rgba(16, 20, 31, 0.88);
+  border: 1px solid #232a3d;
+  color: #e8ecf5;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 13px;
   padding: 6px 10px;
   border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   user-select: none;
 }
 
@@ -25,8 +26,8 @@
 }
 
 .gp-badge.gp-connected .gp-dot {
-  background: #6fc276;
-  box-shadow: 0 0 6px #6fc276;
+  background: #00d06c;
+  box-shadow: 0 0 6px #00d06c;
 }
 
 .gp-badge .gp-label {
@@ -53,22 +54,24 @@
 .gp-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: sans-serif;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
 .gp-modal {
-  background: #fff;
-  color: #222;
+  background: #10141f;
+  color: #e8ecf5;
+  border: 1px solid #232a3d;
   width: min(420px, 92vw);
   max-height: 86vh;
   overflow-y: auto;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 18px 20px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
 }
 
 .gp-modal h2 {
@@ -78,7 +81,7 @@
 
 .gp-modal .gp-hint {
   font-size: 0.85em;
-  color: #666;
+  color: #8b94ab;
   margin-bottom: 14px;
 }
 
@@ -87,7 +90,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #232a3d;
   gap: 10px;
 }
 
@@ -99,17 +102,18 @@
   min-width: 90px;
   text-align: center;
   padding: 6px 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  background: #f5f5f5;
+  border-radius: 7px;
+  border: 1px solid #3a445f;
+  background: #161c2c;
+  color: #e8ecf5;
   cursor: pointer;
   font-size: 0.9em;
 }
 
 .gp-modal .gp-row-btn.gp-listening {
-  background: #4a6cb3;
+  background: #2b8cff;
   color: #fff;
-  border-color: #4a6cb3;
+  border-color: #2b8cff;
 }
 
 .gp-modal .gp-actions {
@@ -123,18 +127,19 @@
   flex: 1;
   padding: 9px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
 }
 
 .gp-modal .gp-reset {
-  background: #eee;
-  color: #333;
+  background: #161c2c;
+  color: #e8ecf5;
+  border: 1px solid #3a445f;
 }
 
 .gp-modal .gp-close {
-  background: #4a6cb3;
+  background: linear-gradient(180deg, #2b8cff, #0a3f9c);
   color: #fff;
 }
 

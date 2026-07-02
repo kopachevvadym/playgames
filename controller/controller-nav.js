@@ -1,32 +1,13 @@
 // On the library page there's no game canvas to send keys to, so instead we
-// let the D-pad/left stick move focus between focusable elements and let the
-// A button "click" whatever is focused. This makes the whole site usable
-// from a couch with just a controller, aside from picking files (browsers
-// only allow a real user gesture to open the native file picker).
+// let the D-pad/left stick (and keyboard arrows — see spatial-nav.js) move
+// focus between focusable elements and let the A button / Enter "click"
+// whatever is focused. This makes the whole site usable from a couch with
+// just a controller, aside from picking files (browsers only allow a real
+// user gesture to open the native file picker).
 
 import { GamepadWatcher } from './controller-core.js';
 import { createBadge, showToast } from './controller-shared-ui.js';
-
-function focusableElements() {
-  return [...document.querySelectorAll('a[href], button, input, select, textarea')]
-    .filter(el => el.offsetParent !== null && !el.disabled);
-}
-
-function moveFocus(dir) {
-  const els = focusableElements();
-  if (els.length === 0) return;
-  const current = document.activeElement;
-  let idx = els.indexOf(current);
-  if (idx === -1) idx = dir === 'down' || dir === 'right' ? -1 : 0;
-
-  if (dir === 'down' || dir === 'right') {
-    idx = Math.min(idx + 1, els.length - 1);
-  } else {
-    idx = Math.max(idx - 1, 0);
-  }
-  els[idx].focus();
-  els[idx].scrollIntoView({ block: 'nearest' });
-}
+import { moveFocus, initKeyboardNav } from './spatial-nav.js';
 
 function activateFocused() {
   const el = document.activeElement;
@@ -36,6 +17,8 @@ function activateFocused() {
 }
 
 function init() {
+  initKeyboardNav();
+
   const watcher = new GamepadWatcher();
 
   watcher.addEventListener('connect', () => showToast(`🎮 ${watcher.padLabel || 'Контролер'} підключено`));

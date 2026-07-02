@@ -13,14 +13,14 @@ let state = {
 let defaultSettings = {};
 
 async function main() {
-    document.getElementById("loading").textContent = "Loading CheerpJ...";
+    document.getElementById("loading").textContent = "Завантаження CheerpJ…";
     await cheerpjInit({
         enableDebug: false
     });
 
     lib = await cheerpjRunLibrary(cheerpjWebRoot+"/freej2me-web.jar");
 
-    document.getElementById("loading").textContent = "Loading...";
+    document.getElementById("loading").textContent = "Завантаження…";
 
     launcherUtil = await lib.pl.zb3.freej2me.launcher.LauncherUtil;
 
@@ -112,7 +112,10 @@ async function loadGames() {
     if (installedAppsBlob) {
         const installedIds = (await installedAppsBlob.text()).trim().split("\n");
 
-        for (const appId of installedIds) {
+        // load every game's files (name, icon, 3 config files) in parallel
+        // instead of one await at a time — startup goes from
+        // games*5 sequential filesystem reads to one parallel batch
+        return await Promise.all(installedIds.map(async appId => {
             const napp = {
                 appId,
                 name: appId,
@@ -122,10 +125,16 @@ async function loadGames() {
                 systemProperties: {},
             };
 
-            const name = await maybeReadCheerpJFileText("/files/" + appId + "/name");
+            const [name, iconBlob, ...configs] = await Promise.all([
+                maybeReadCheerpJFileText("/files/" + appId + "/name"),
+                cjFileBlob("/files/" + appId + "/icon"),
+                maybeReadCheerpJFileText("/files/" + appId + "/config/settings.conf"),
+                maybeReadCheerpJFileText("/files/" + appId + "/config/appproperties.conf"),
+                maybeReadCheerpJFileText("/files/" + appId + "/config/systemproperties.conf"),
+            ]);
+
             if (name) napp.name = name;
 
-            const iconBlob = await cjFileBlob("/files/" + appId + "/icon");
             if (iconBlob) {
                 const dataUrl = await getDataUrlFromBlob(iconBlob);
                 if (dataUrl) {
@@ -133,19 +142,14 @@ async function loadGames() {
                 }
             }
 
-            for (const [fname, keyName] of [
-                ["/files/" + appId + "/config/settings.conf", "settings"],
-                ["/files/" + appId + "/config/appproperties.conf", "appProperties"],
-                ["/files/" + appId + "/config/systemproperties.conf", "systemProperties"],
-            ]) {
-                const content = await maybeReadCheerpJFileText(fname);
-                if (content) {
-                    readToKv(content, napp[keyName]);
+            for (const [i, keyName] of ["settings", "appProperties", "systemProperties"].entries()) {
+                if (configs[i]) {
+                    readToKv(configs[i], napp[keyName]);
                 }
             }
 
-            apps.push(napp);
-        }
+            return napp;
+        }));
     }
 
     return apps;
@@ -154,6 +158,14 @@ async function loadGames() {
 function fillGamesList(games) {
     const container = document.getElementById("game-list");
     container.innerHTML = "";
+
+    if (games.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "Поки що немає ігор — додайте JAR-файл нижче";
+        container.appendChild(empty);
+        return;
+    }
 
     for (const game of games) {
         const item = document.createElement("div");
@@ -180,7 +192,7 @@ function fillGamesList(games) {
         item.appendChild(link);
 
         const manageButton = document.createElement("button");
-        manageButton.textContent = "Manage";
+        manageButton.textContent = "⚙︎ Керувати";
         manageButton.onclick = () => openEditGame(game);
         item.appendChild(manageButton);
 
@@ -199,7 +211,7 @@ function setupAddMode() {
         systemProperties: {},
     };
 
-    document.getElementById("add-edit-text").textContent = "Add new game";
+    document.getElementById("add-edit-text").textContent = "Додати нову гру";
 
     document.getElementById("file-input-step").style.display = "";
     document.getElementById("file-input-loading").style.display = "none";
@@ -334,7 +346,7 @@ async function setupAddManageGame(app, isAdding) {
     if (!isAdding) {
         document.getElementById("uninstall-btn").disabled = false;
         document.getElementById("uninstall-btn").onclick = (e) => {
-            if (!confirm("Do you want to uninstall " + app.name + "?")) {
+            if (!confirm("Видалити гру «" + app.name + "»?")) {
                 return;
             }
 
@@ -344,7 +356,7 @@ async function setupAddManageGame(app, isAdding) {
 
         document.getElementById("wipe-data-btn").disabled = false;
         document.getElementById("wipe-data-btn").onclick = (e) => {
-            if (!confirm("Do you want wipe " + app.name + " rms storage?")) {
+            if (!confirm("Стерти збереження гри «" + app.name + "»?")) {
                 return;
             }
 
@@ -400,7 +412,7 @@ async function setupAddManageGame(app, isAdding) {
         .join("\n");
 
     document.getElementById("add-save-button").disabled = false;
-    document.getElementById("add-save-button").textContent = isAdding ? "Add game" : "Save game";
+    document.getElementById("add-save-button").textContent = isAdding ? "Додати гру" : "Зберегти";
     document.getElementById("add-save-button").onclick = doAddSaveGame;
 }
 
@@ -497,14 +509,14 @@ function openEditGame(gameObj) {
         return;
     }
     state.currentGame = gameObj;
-    document.getElementById("add-edit-text").textContent = "Edit game";
+    document.getElementById("add-edit-text").textContent = "Редагувати гру";
 
     setupAddManageGame(gameObj, false);
 }
 
 function confirmDiscard() {
     if (state.currentGame != null && (state.currentGame.jarFile || state.currentGame.appId)) {
-        if (!confirm("Discard changes?")) {
+        if (!confirm("Скасувати зміни?")) {
             return false;
         }
     }
@@ -565,7 +577,7 @@ async function doExportData() {
         setTimeout(() => URL.revokeObjectURL(objectURL), 1000);
     } catch (error) {
         console.error("Error exporting data:", error);
-        alert("Error exporting data");
+        alert("Помилка експорту даних");
     }
 }
 

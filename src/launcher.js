@@ -13,6 +13,15 @@ let state = {
 let defaultSettings = {};
 
 async function main() {
+    // All library state (installed games, settings, saves) lives in CheerpJ's
+    // IndexedDB-backed /files/ mount. Ask the browser to mark this origin's
+    // storage persistent so it isn't evicted under storage pressure.
+    // NOTE: IndexedDB is per-origin (host+port!) — serving the site from a
+    // different port means a different, empty database. Always use one port.
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().catch(() => {});
+    }
+
     document.getElementById("loading").textContent = "Завантаження CheerpJ…";
     await cheerpjInit({
         enableDebug: false
@@ -110,7 +119,9 @@ async function loadGames() {
     }
 
     if (installedAppsBlob) {
-        const installedIds = (await installedAppsBlob.text()).trim().split("\n");
+        // filter(Boolean): an empty apps.list (all games uninstalled) must not
+        // produce a phantom game with an empty id
+        const installedIds = (await installedAppsBlob.text()).trim().split("\n").filter(Boolean);
 
         // load every game's files (name, icon, 3 config files) in parallel
         // instead of one await at a time — startup goes from
